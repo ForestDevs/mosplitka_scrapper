@@ -22,7 +22,6 @@ func randomString() string {
 
 func OnRequest(c *colly.Collector) {
 	c.OnRequest(func(r *colly.Request) {
-		// log.Printf("Visit: %s", r.URL)
 		r.Headers.Set("User-Agent", randomString())
 	})
 }
