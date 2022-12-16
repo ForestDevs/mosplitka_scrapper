@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"log"
 	"math/rand"
 	"net"
 	"net/http"
@@ -23,7 +22,7 @@ func randomString() string {
 
 func OnRequest(c *colly.Collector) {
 	c.OnRequest(func(r *colly.Request) {
-		log.Printf("Visit: %s", r.URL)
+		// log.Printf("Visit: %s", r.URL)
 		r.Headers.Set("User-Agent", randomString())
 	})
 }

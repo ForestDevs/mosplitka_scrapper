@@ -1,5 +1,6 @@
 package models
 
 type Collection struct {
-	Name string
+	Name   string
+	Images []string
 }
