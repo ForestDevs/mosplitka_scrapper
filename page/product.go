@@ -3,24 +3,38 @@ package page
 import (
 	"mosplitka-parser/models"
 	"mosplitka-parser/utils"
+	"strconv"
+	"strings"
 
 	"github.com/gocolly/colly/v2"
 )
 
 const (
-	productMainBlock           = "//div[@class='container']"                                                            // main block
-	productTitle               = "//div[@class='tile-hero']//h1"                                                        // name
-	productPrice               = "//div[@class='tile-hero']//p[contains(@class,'tile-shop__price')]"                    // main price
-	productImages              = "//img[@class='pop-images-big-item__img']"                                             // images
-	productFeaturesTitle       = "//div[@class='communication-prop__col'][1]//span[@class='tile-prop-tabs__name-wrap']" // product feateruse titiles from product card
-	productFeaturesDescription = "//div[@class='communication-prop__col'][1]//p[@class='tile-prop-tabs__value']"        // valuse feauters
+	productMainBlock           = "//div[@class='container']"                                                     // main block
+	productTitle               = "//div[@class='tile-hero']//h1"                                                 // name
+	productPrice               = "//div[@class='tile-hero']//p[contains(@class,'tile-shop__price')]"             // main price
+	productImages              = "//img[@class='pop-images-big-item__img']"                                      // images
+	productFeaturesItems       = "//div[@class='communication-prop__col'][1]//li"                                // product feateruse titiles from product card
+	productFeaturesDescription = "//div[@class='communication-prop__col'][1]//p[@class='tile-prop-tabs__value']" // valuse feauters
 )
 
 func productFeaturesCollector(x *colly.XMLElement, col map[string]string) map[string]string {
-	titles := x.ChildTexts(productFeaturesTitle)
-	descs := x.ChildTexts(productFeaturesDescription)
-	for i := 0; i < len(titles); i++ {
-		col[titles[i]] = " " + descs[i] + " "
+	elementsCount := len(x.ChildTexts(productFeaturesItems))
+	if elementsCount != 0 {
+		for i := 0; i <= elementsCount; i++ {
+			title := x.ChildText("//div[@class='communication-prop__col'][1]//li[" + strconv.Itoa(i) + "]//span[@class='tile-prop-tabs__name-wrap']")
+			manyDescCount := len(x.ChildTexts("//div[@class='communication-prop__col'][1]//li[" + strconv.Itoa(i) + "]//span[@class='tile-prop-tabs__value-name']//span[@class='tile-prop-tabs__row']"))
+			if manyDescCount > 1 {
+				desc := strings.Join(x.ChildTexts("//div[@class='communication-prop__col'][1]//li["+strconv.Itoa(i)+"]//span[@class='tile-prop-tabs__value-name']//span[@class='tile-prop-tabs__row']"), ",")
+				col[title] = desc
+			} else {
+				desc := x.ChildText("//div[@class='communication-prop__col'][1]//li[" + strconv.Itoa(i) + "]//span[@class='tile-prop-tabs__value-name']")
+				if desc == "" {
+					desc = x.ChildText("//div[@class='communication-prop__col'][1]//li[" + strconv.Itoa(i) + "]//a[@class='tile-prop-tabs__value-name']")
+				}
+				col[title] = desc
+			}
+		}
 	}
 	return col
 }
